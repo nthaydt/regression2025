@@ -9,9 +9,71 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Libraries
 
-```{r cars}
+```{r libraries}
+library(lme4)
+```
+
+Data Sets:
+Shrike Habitat Data - 
+Chesapeake and Ohio Canal Turtle Data - 
+
+## Bring in Data Sets
+```{r}
+turtle_data <- read.csv("data/CO-turtles.csv")
+shrike_data <- 
+```
+
+## Linear Models
+```{r}
+# Does turtle species or carapace length impact individual mass?
+m1 <- lm(data = turtle_data, mass ~ species) # same as an anova
+m2 <- lm(data = turtle_data, mass ~ carapace)
+m3 <- lm(data = turtle_data, mass ~ species + carapace) # examine as independent terms
+m4 <- lm(data = turtle_data, mass ~ species*carapace) # examine species and carapace as both interaction terms and independent terms
+m5 <- lm(data = turtle_data, mass ~ species:carapace) # just looking at interactions
+
+summary(m1)
+summary(m2)
+summary(m3)
+summary(m4)
+summary(m5)
+```
+
+## Generalized Linear Models
+```{r}
 
 ```
+
+### MIXED MODELS
+Fixed vs. random effects:
+
+
+## Linear Mixed Models
+```{r}
+# Does carapace length impact individual mass?
+m1 <- lmer(data = turtle_data, mass ~ carapace + (1|species))
+summary(m1)
+
+library(lmerTest)
+m2 <- lmerTest::lmer(data = turtle_data, mass ~ carapace + (1|species))
+summary(m2)
+```
+
+## Generalized Linear Mixed Models
+```{r}
+
+```
+
+## Making Tables with Regression Outputs
+```{r}
+
+```
+
+## Viewing Effects (Including interaction effects)
+```{r}
+
+```
+
 
