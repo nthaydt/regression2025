@@ -13,6 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries}
 library(lme4)
+library(AICcmodavg)
+library(GGally)
+library(sjPlot)
 ```
 
 Data Sets:
@@ -63,6 +66,152 @@ summary(m2)
 
 ## Generalized Linear Mixed Models
 ```{r}
+
+#Rescale Wire Length since we have much larger values (i.e. 1000 m) when compared to other variables
+rescale<-function(x) (x-min(x)) / (max(x) - min(x)) * 100
+Wire100scale<-rescale(Habitat$Wire100)
+
+##_______________________________________________________________
+
+#Site-Level Characteristics
+
+##____________________________________________________________________
+
+#check for correlation of variables to be included in models
+#values of r>0.7 typically considered highly correlated, decide which to remove
+
+cor(Habitat[, c("PerchH5", "Crops11", "Water11")], use = "complete.obs")
+
+ggpairs(Habitat, columns = c("PerchH5", "Crops11", "Water11"))
+
+#Build full model with all variables of interest
+
+site_full<- glmer(Use ~ PerchH5 + Crops11 + Water11 + 
+                    (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+
+#Run models with all possible combinations of predictor variables and null with dredge function
+
+options(na.action = "na.fail") #Ensure each model is run with the same dataset and no rows are excluded because of NA values
+
+model_set1 <- dredge(site_full)
+
+#Analyze models by comparing AICc values
+#Models in table with deltaAICc (delta) values < 2 considered equivalent
+print(model_set1)
+
+#build top models (delta AICc<2) from dredge table output --> print(model_set1)
+
+sitee_top1<- glmer(Use ~ PerchH5 + Water11 + 
+                 (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+
+sitee_top2<- glmer(Use ~ Crops11 + PerchH5 + Water11 + 
+                 (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+
+#Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
+#Variable is important if its 85% confidence interval does not overlap (see Arnold 2010)
+
+confint(sitee_top1,level=0.85, method="Wald")
+confint(sitee_top2,level=0.85, method="Wald")
+
+#Use summary function to get beta estimates for each important predictor variable
+#Beta > 0 --> positive correlation, Beta < 0 --> negative correlation
+
+summary(site_top1)
+summary(sitee_top2)
+
+##_________________Plots_______________________##
+
+#Make plot with predicted values to visualize model correlation trends
+
+plot_model(sitee_top1, type = "pred", terms = "Water11")
+plot_model(sitee_top1, type = "pred", terms="PerchH5 [all]") #[all ensures smooth plot]
+
+
+#Make boxplot with predicted values to visualize model correlation trends for binary variables
+
+#Get predicted probabilities from the model (fine_top1)
+predicted_values <- predict(sitee_top1, type = "response")
+
+#Create a new data frame that includes the predicted and actual values for Water11
+prediction_data <- data.frame(
+  Water11 = Habitat$Water11,
+  Predicted = predicted_values
+)
+
+# Create a boxplot with ggplot2
+ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +  # Boxplot with color customization
+  geom_jitter(width = 0.2, alpha = 0.5) +             # Add jittered points for better visualization
+  labs(title = "Predicted Probabilities by Water11", 
+       x = "Water11", y = "Predicted Probability") +
+  theme_minimal()
+
+
+
+
+##____________________________________________________________________
+
+#Fine-scale Level Characteristics
+
+##____________________________________________________________________
+
+
+#check for correlation of variables to be included in models
+#values of r>0.7 typically considered highly correlated, decide which to remove
+
+cor(Habitat[, c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100")], use = "complete.obs")
+
+ggpairs(Habitat, columns = c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100"))
+
+#Build full model with all variables of interest
+
+fine_full<- glmer(Use ~ Ditches100 + GrassWavg100 + GrassHavg100 + Wire100scale + 
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+
+#Run models with all possible combinations of predictor variables and null with dredge function
+
+options(na.action = "na.fail") #Ensure each model is run with the same dataset and no rows are excluded because of NA values
+
+model_set2 <- dredge(fine_full)
+
+#Analyze models by comparing AICc values
+#Models in table with deltaAICc (delta) values < 2 considered equivalent
+print(model_set2)
+
+#build top models (delta AICc<2) from dredge table output --> print(model_set1)
+
+fine_top1<- glmer(Use ~ GrassHavg100 +
+                    (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+
+fine_top2<- glmer(Use ~ Ditches100 + GrassHavg100 + Wire100scale +
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+
+fine_top3<- glmer(Use ~ GrassWavg100 + GrassHavg100 + Wire100scale +
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+
+#Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
+#Variable is important if its 85% confidence interval does not overlap (see Arnold 2010)
+
+confint(fine_top1,level=0.85, method="Wald")
+confint(fine_top2,level=0.85, method="Wald")
+confint(fine_top3,level=0.85, method="Wald")
+
+#Use summary function to get beta estimates for each important predictor variable
+#Beta > 0 --> positive correlation, Beta < 0 --> negative correlation
+
+summary(fine_top1)
+summary(fine_top2)
+summary(fine_top3)
+
+##____________________Plots_____________________##
+
+#Model plots to visualize correlation trends
+
+plot_model(fine_top1, type = "pred", terms = "GrassHavg100 [all]")
+plot_model(fine_top2, type = "pred", terms="Wire100scale")
+
+
+
 
 ```
 
