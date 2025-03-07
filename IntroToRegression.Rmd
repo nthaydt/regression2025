@@ -83,13 +83,13 @@ Wire100scale<-rescale(Habitat$Wire100)
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
 
-cor(Habitat[, c("PerchH5", "Crops11", "Water11")], use = "complete.obs")
+cor(Habitat[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
 
-ggpairs(Habitat, columns = c("PerchH5", "Crops11", "Water11"))
+ggpairs(Habitat, columns = c("PerchH", "Crops11", "Water11"))
 
 # Build full model with all variables of interest
 
-site_full<- glmer(Use ~ PerchH5 + Crops11 + Water11 + 
+site_full<- glmer(Use ~ PerchH + Crops11 + Water11 + 
                     (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
 
 # Singularity error may result if random effect explains too little variance,
@@ -106,10 +106,10 @@ print(model_set1)
 
 #Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
-site_top1<- glmer(Use ~ PerchH5 + Water11 + 
+site_top1<- glmer(Use ~ PerchH + Water11 + 
                  (1|PointID), family = binomial, data = Habitat)
 
-site_top2<- glmer(Use ~ Crops11 + PerchH5 + Water11 + 
+site_top2<- glmer(Use ~ Crops11 + PerchH + Water11 + 
                  (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
 
 # Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
@@ -129,7 +129,7 @@ summary(site_top2)
 #Make plot with predicted values to visualize model correlation trends
 
 plot_model(site_top1, type = "pred", terms = "Water11")
-plot_model(site_top1, type = "pred", terms="PerchH5 [all]") #[all ensures smooth plot]
+plot_model(site_top1, type = "pred", terms="PerchH [all]") #[all ensures smooth plot]
 
 
 # Make boxplot with predicted values to visualize model correlation trends for binary variables
