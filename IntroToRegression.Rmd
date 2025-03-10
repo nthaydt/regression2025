@@ -50,7 +50,7 @@ summary(m5)
 Fixed vs. random effects:
 
 
-## Linear Mixed Models
+## Linear Mixed Models 
 ```{r}
 # Does carapace length impact individual mass?
 m1 <- lmer(data = turtle_data, mass ~ carapace + (1|species))
@@ -61,9 +61,15 @@ m2 <- lmerTest::lmer(data = turtle_data, mass ~ carapace + (1|species))
 summary(m2)
 ```
 
-## Generalized Linear Mixed Models
+## Generalized Linear Mixed Models - Can use non-normal distributions such as POISSON and BINOMIAL
 ```{r}
+# Does the species impact the number of leeches observed?
+m1 <- lmer(data = turtle_data, leeches ~ species + (1|site))
+summary(m1)
 
+library(lmerTest)
+m2 <- lmerTest::lmer(data = turtle_data, leeches ~ species + (1|site))
+summary(m2)
 ```
 
 ## Making Tables with Regression Outputs
