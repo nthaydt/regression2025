@@ -25,7 +25,7 @@ Chesapeake and Ohio Canal Turtle Data -
 ## Bring in Data Sets
 ```{r}
 turtle_data <- read.csv("data/CO-turtles.csv")
-shrike_data <- 
+shrike_data <- read.csv("data/shrike_habitat_data.csv")
 ```
 
 ## Linear Models
@@ -66,7 +66,7 @@ summary(m2)
 
 ## Generalized Linear Mixed Models - Can use non-normal distributions such as POISSON and BINOMIAL
 ```{r}
-# Does the species impact the number of leeches observed?
+# Turtles: Does the species impact the number of leeches observed?
 m1 <- lmer(data = turtle_data, leeches ~ species + (1|site))
 summary(m1)
 
