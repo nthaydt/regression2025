@@ -17,6 +17,7 @@ library(AICcmodavg)
 library(GGally)
 library(sjPlot)
 library(lmerTest)
+library(MuMIn)
 ```
 
 2 Data Sets:
@@ -86,28 +87,26 @@ glmm1 <- glmer(data = turtle_data,
                + (1|site), family = poisson)
 summary(glmm1)
 
-library(lmerTest)
-m2 <- lmerTest::glmer(data = turtle_data, leeches ~ species + (1|site), 
-                     family = )
-summary(m2)
+library(lmerTest) # If you are using lmer model and can't see the p-value output
 
 # Shrikes: Rescale Wire Length since we have much larger values (i.e. 1000 m) when compared to other variables
 rescale<-function(x) (x-min(x)) / (max(x) - min(x)) * 100
-Wire100scale<-rescale(Habitat$Wire100)
+Wire100scale<-rescale(shrike_data$Wire100)
 
 ## Site-Level Characteristics
 
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
 
-cor(Habitat[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
+cor(shrike_data[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
 
-ggpairs(Habitat, columns = c("PerchH", "Crops11", "Water11"))
+ggpairs(shrike_data, columns = c("PerchH", "Crops11", "Water11"))
 
 # Build full model with all variables of interest
 
 site_full<- glmer(Use ~ PerchH + Crops11 + Water11 + 
-                    (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+                    (1|PointID) + (1|BirdID), family = binomial, 
+                    data = shrike_data)
 
 # Singularity error may result if random effect explains too little variance,
 # But random errors are important to include here to pair used/random points and account for psuedo-replication
@@ -124,10 +123,11 @@ print(model_set1)
 #Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
 site_top1<- glmer(Use ~ PerchH + Water11 + 
-                 (1|PointID), family = binomial, data = Habitat)
+                 (1|PointID), family = binomial, data = shrike_data)
 
 site_top2<- glmer(Use ~ Crops11 + PerchH + Water11 + 
-                 (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                 (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, 
+                 data = shrike_data)
 
 # Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
 # Variable is important if its 85% confidence interval does not overlap (see Arnold 2010)
@@ -157,7 +157,7 @@ predicted_values <- predict(site_top1, type = "response")
 
 # Create a new data frame that includes the predicted and actual values for Water11
 prediction_data <- data.frame(
-  Water11 = Habitat$Water11,
+  Water11 = shrike_data$Water11,
   Predicted = predicted_values
 )
 
@@ -176,14 +176,16 @@ ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
 
-cor(Habitat[, c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100")], use = "complete.obs")
+cor(shrike_data[, c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100")], use = "complete.obs")
 
-ggpairs(Habitat, columns = c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100"))
+ggpairs(shrike_data, columns = c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100"))
 
 # Build full model with all variables of interest
 
-fine_full<- glmer(Use ~ Ditches100 + GrassWavg100 + GrassHavg100 + Wire100scale + 
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+fine_full<- glmer(Use ~ Ditches100 + GrassWavg100 + 
+                    GrassHavg100 + Wire100scale + 
+                    (1|PointID) + (1|BirdID), 
+                  family = binomial, nAGQ =1, data = shrike_data)
 
 # Run models with all possible combinations of predictor variables and null with dredge function
 
@@ -198,13 +200,16 @@ print(model_set2)
 # Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
 fine_top1<- glmer(Use ~ GrassHavg100 +
-                    (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+                    (1|PointID) + (1|BirdID), family = binomial, 
+                  data = shrike_data)
 
 fine_top2<- glmer(Use ~ Ditches100 + GrassHavg100 + Wire100scale +
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, 
+                  data = shrike_data)
 
 fine_top3<- glmer(Use ~ GrassWavg100 + GrassHavg100 + Wire100scale +
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1,
+                  data = shrike_data)
 
 # Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
 # Variable is important if its 85% confidence interval does not overlap (see Arnold 2010)
@@ -239,14 +244,17 @@ plot_model(fine_top2, type = "pred", terms="Wire100scale")
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
 
-cor(Habitat[, c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500")], use = "complete.obs")
+cor(shrike_data[, c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500")], use = "complete.obs")
 
-ggpairs(Habitat, columns = c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500"))
+ggpairs(shrike_data, columns = c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500"))
 
 #Build full model with all variables of interest
 
-broad_full<- glmer(Use ~ Cotton500 + Rice500 + Soy500 + Develop500 + Forest500 +
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+broad_full<- glmer(Use ~ Cotton500 + Rice500 + Soy500 + 
+                     Develop500 + Forest500 +
+                    (1|PointID) + (1|BirdID), 
+                   family = binomial, nAGQ =1, 
+                   data = shrike_data)
 
 # Run models with all possible combinations of predictor variables and null with dredge function
 
@@ -261,19 +269,24 @@ print(model_set3)
 # Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
 broad_top1<- glmer(Use ~ Develop500 +
-                    (1|PointID) + (1|BirdID), family = binomial, data = Habitat)
+                    (1|PointID) + (1|BirdID), 
+                   family = binomial, data = shrike_data)
 
 broad_top2<- glmer(Use ~ Develop500 + Soy500 +
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, 
+                   data = shrike_data)
 
 broad_top3<- glmer(Use ~ Develop500 + Forest500 +
-                    (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                    (1|PointID) + (1|BirdID), 
+                   family = binomial, nAGQ =1, data = shrike_data)
 
 broad_top4<- glmer(Use ~ Develop500 + Rice500 +
-                     (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                     (1|PointID) + (1|BirdID), family = binomial, 
+                   nAGQ =1, data = shrike_data)
 
 broad_top5<- glmer(Use ~ Develop500 + Cotton500 +
-                     (1|PointID) + (1|BirdID), family = binomial, nAGQ =1, data = Habitat)
+                     (1|PointID) + (1|BirdID), family = binomial, 
+                   nAGQ =1, data = shrike_data)
 
 
 # Evaluate confidence intervals to evaluate which parameters may be important in explaining response variable
