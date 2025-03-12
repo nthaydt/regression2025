@@ -88,7 +88,11 @@ glmm1 <- glmer(data = turtle_data,
 summary(glmm1)
 
 library(lmerTest) # If you are using lmer model and can't see the p-value output
+```
 
+##Generalized Linear Mixed Model (Shrike Data)
+# Look at correlations between predictors
+```{r}
 # Shrikes: Rescale Wire Length since we have much larger values (i.e. 1000 m) when compared to other variables
 rescale<-function(x) (x-min(x)) / (max(x) - min(x)) * 100
 Wire100scale<-rescale(shrike_data$Wire100)
@@ -101,7 +105,10 @@ Wire100scale<-rescale(shrike_data$Wire100)
 cor(shrike_data[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
 
 ggpairs(shrike_data, columns = c("PerchH", "Crops11", "Water11"))
+```
 
+## Build full model
+```{r}
 # Build full model with all variables of interest
 
 site_full<- glmer(Use ~ PerchH + Crops11 + Water11 + 
@@ -119,7 +126,10 @@ model_set1 <- dredge(site_full)
 # Analyze models by comparing AICc values
 # Models in table with deltaAICc (delta) values < 2 considered equivalent
 print(model_set1)
+```
 
+## Build top models for site-level characteristics
+```{r}
 #Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
 site_top1<- glmer(Use ~ PerchH + Water11 + 
@@ -140,10 +150,10 @@ confint(site_top2,level=0.85, method="Wald")
 
 summary(site_top1)
 summary(site_top2)
+```
 
-
-##_________________Plots_______________________##
-
+## Plot Top Models
+```{r}
 #Make plot with predicted values to visualize model correlation trends
 
 plot_model(site_top1, type = "pred", terms = "Water11")
@@ -168,10 +178,11 @@ ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
   labs(title = "Predicted Probabilities by Water11", 
        x = "Water11", y = "Predicted Probability") +
   theme_minimal()
+```
 
+# Look at correlations between predictors for Fine-scale characteristics
+```{r}
 ## Fine-scale Level Characteristics
-
-##____________________________________________________________________________________________________________
 
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
@@ -179,7 +190,10 @@ ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
 cor(shrike_data[, c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100")], use = "complete.obs")
 
 ggpairs(shrike_data, columns = c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100"))
+```
 
+## Build Models for Fine-scale level characteristics
+```{r}
 # Build full model with all variables of interest
 
 fine_full<- glmer(Use ~ Ditches100 + GrassWavg100 + 
@@ -224,22 +238,21 @@ confint(fine_top3,level=0.85, method="Wald")
 summary(fine_top1)
 summary(fine_top2)
 summary(fine_top3)
+```
 
-##____________________Plots_____________________##
 
+##Plot Tops Models for Fine-Scale Characteristics
+```{r}
 # Model plots to visualize correlation trends
 
 plot_model(fine_top1, type = "pred", terms = "GrassHavg100 [all]")
 plot_model(fine_top2, type = "pred", terms="Wire100scale")
+```
 
+## Look at correlations between predictors for Broad-scale characteristics
 
-##_______________________________________________________________________________________________________
-
+```{r}
 ## Broad-scale Level Characteristics
-
-##_________________________________________________________________________________________________________
-
-
 
 # Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
@@ -247,7 +260,10 @@ plot_model(fine_top2, type = "pred", terms="Wire100scale")
 cor(shrike_data[, c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500")], use = "complete.obs")
 
 ggpairs(shrike_data, columns = c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500"))
+```
 
+## Build Full Model for Broad-Scale Characteristics
+```{r}
 #Build full model with all variables of interest
 
 broad_full<- glmer(Use ~ Cotton500 + Rice500 + Soy500 + 
@@ -265,7 +281,10 @@ model_set3 <- dredge(broad_full)
 # Analyze models by comparing AICc values
 # Models in table with deltaAICc (delta) values < 2 considered equivalent
 print(model_set3)
+```
 
+## Build Top Models for Broad-Scale Characteristics
+```{r}
 # Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
 broad_top1<- glmer(Use ~ Develop500 +
@@ -302,23 +321,25 @@ confint(broad_top5,level=0.85, method="Wald")
 # Beta > 0 --> positive correlation, Beta < 0 --> negative correlation
 
 summary(broad_top1)
+```
 
-
-##____________________Plots_____________________##
-
+## Plot Model Broad-scale characteristics
+```{r}
 #Model plots to visualize correlation trends
 
 plot_model(broad_top1, type = "pred", terms = "Develop500 [all]")
 ```
 
-## Making Tables with Regression Outputs
-```{r}
 
-```
 
-## Viewing Effects (Including interaction effects)
-```{r}
 
-```
+
+
+
+
+
+
+
+
 
 
