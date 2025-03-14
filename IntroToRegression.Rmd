@@ -91,9 +91,9 @@ library(lmerTest) # If you are using lmer model and can't see the p-value output
 ```
 
 
-X_________________________________________________________________________
+X_________________________________________________________________________X
      Shrike Data Example -- Generalized Linear Mixed Model Selection
-X_________________________________________________________________________
+X_________________________________________________________________________X
 
 
 ##___Site-Level Habitat Characteristics Model Selection__
@@ -182,7 +182,7 @@ ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
        x = "Water11", y = "Predicted Probability") +
   theme_minimal()
 ```
-X__________________________________________________________________
+X_________________________________________________________X
 
 
 ##___Fine-Scale Habitat Characteristics Model Selection__
@@ -258,7 +258,7 @@ summary(fine_top3)
 plot_model(fine_top1, type = "pred", terms = "GrassHavg100 [all]")
 plot_model(fine_top2, type = "pred", terms="Wire100scale")
 ```
-X_________________________________________________________________
+X________________________________________________________X
 
 
 ##___Broad-Scale Habitat Characteristics Model Selection__
