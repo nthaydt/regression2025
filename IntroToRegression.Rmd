@@ -90,18 +90,17 @@ summary(glmm1)
 library(lmerTest) # If you are using lmer model and can't see the p-value output
 ```
 
-## Shrike Data Example
 
-## Generalized Linear Mixed Model Selection
 
-## Site-Level Habitat Characteristics Model Selection
+Shrike Data Example -- Generalized Linear Mixed Model Selection
+
+##___Site-Level Habitat Characteristics Model Selection__
 
 # Check for correlation between predictor variables
 ```{r}
 
 ## Site-Level Characteristics
 
-# Check for correlation of variables to be included in models
 # (Values of r>0.7 typically considered highly correlated, decide which to remove)
 
 cor(shrike_data[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
@@ -109,7 +108,7 @@ cor(shrike_data[, c("PerchH", "Crops11", "Water11")], use = "complete.obs")
 ggpairs(shrike_data, columns = c("PerchH", "Crops11", "Water11"))
 ```
 
-## Build full model
+## Build and compare models for site-level habitat characteristics
 ```{r}
 # Build full model with all variables of interest
 
@@ -154,7 +153,7 @@ summary(site_top1)
 summary(site_top2)
 ```
 
-## Plot Top Models
+## Plot Top Models for Site-level habitat characteristics
 ```{r}
 #Make plot with predicted values to visualize model correlation trends
 
@@ -182,7 +181,7 @@ ggplot(prediction_data, aes(x = factor(Water11), y = Predicted)) +
   theme_minimal()
 ```
 
-## Fine-Level Habitat Characteristic Model Selection
+##___Fine-Scale Habitat Characteristics Model Selection__
 
 # Check for correlation between predictor variables
 ```{r}
@@ -199,7 +198,7 @@ cor(shrike_data[, c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100")], u
 ggpairs(shrike_data, columns = c("Ditches100", "GrassWavg100", "GrassHavg100", "Wire100"))
 ```
 
-## Build and compare models for fine-scale characteristics
+## Build and compare models for fine-scale habitat characteristics
 ```{r}
 # Build full model with all variables of interest
 
@@ -247,8 +246,7 @@ summary(fine_top2)
 summary(fine_top3)
 ```
 
-
-##Plot Tops Models for fine-scale characteristics
+##Plot Tops Models for Fine-scale habitat characteristics
 
 ```{r}
 # Model plots to visualize correlation trends
@@ -257,20 +255,20 @@ plot_model(fine_top1, type = "pred", terms = "GrassHavg100 [all]")
 plot_model(fine_top2, type = "pred", terms="Wire100scale")
 ```
 
-## Look at correlations between predictors for Broad-scale characteristics
 
+
+##___Broad-Scale Habitat Characteristics Model Selection__
+
+# Check for correlation between predictor variables
 ```{r}
-## Broad-scale Level Characteristics
-
-# Check for correlation of variables to be included in models
-# (Values of r>0.7 typically considered highly correlated, decide which to remove)
+#(Values of r>0.7 typically considered highly correlated, decide which to remove)
 
 cor(shrike_data[, c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500")], use = "complete.obs")
 
 ggpairs(shrike_data, columns = c("Cotton500", "Rice500", "Soy500", "Develop500", "Forest500"))
 ```
 
-## Build Full Model for Broad-Scale Characteristics
+## Build and compare models for broad-scale habitat characteristics
 ```{r}
 #Build full model with all variables of interest
 
@@ -291,7 +289,7 @@ model_set3 <- dredge(broad_full)
 print(model_set3)
 ```
 
-## Build Top Models for Broad-Scale Characteristics
+## Build Top Models for Broad-scale habitat characteristics
 ```{r}
 # Build top models (delta AICc<2) from dredge table output --> print(model_set1)
 
@@ -331,7 +329,7 @@ confint(broad_top5,level=0.85, method="Wald")
 summary(broad_top1)
 ```
 
-## Plot Model Broad-scale characteristics
+## Plot Top Models for Broad-scale habitat characteristics
 ```{r}
 #Model plots to visualize correlation trends
 
